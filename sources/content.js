@@ -79,7 +79,7 @@ function updateDadosAula() {
 	if(finalBlocoId === currentBlocoId) {
 		/// coloca bloco atual como inicio
 		currentBlocoId = 0;
-		currentUser.BlocoId = currentBlocoId;
+		currentUser.b = String(currentBlocoId);
 		/// atualiza nos logs
 		chrome.runtime.sendMessage({messageType: "update_userlogs", currentUser: currentUser},
 			(r) => {console.log("update_userlogs");}
@@ -175,7 +175,7 @@ function populateCurrentAulaXML(xml) {
 
 	/// remove comentarios que causam conflitos
 	xml = xml.replace("<!--");
-	xml.split('\n').filter(function (s) { return (s.match('<!-')) ? "" : s })
+	xml.split('\n').filter(function (s) { return (s.match('<!-')) ? "" : s });
 
 	/// paseia a string para xml
 	currentAulaXML = $.parseXML(xml);
@@ -183,7 +183,7 @@ function populateCurrentAulaXML(xml) {
 
 function populateBlocosDict() {
 	if(currentAulaXML === undefined) {
-		console.log("ERROR: currentAulaXML is NOT populated!")
+		console.log("ERROR: currentAulaXML is NOT populated!");
 		return;
 	}
 
@@ -226,7 +226,7 @@ function addBlocoIdListener() {
 
 					/// atualiza nos logs
 					if(currentUser !== undefined) {
-						currentUser.BlocoId = currentBlocoId;
+						currentUser.b = String(currentBlocoId);
 
 						sendResponse({status: "success", currentUser: currentUser});
 					}
@@ -252,13 +252,12 @@ function runUserLoginScript() {
 
         /// cria objeto com as informacoes do usuario atual
 	    currentUser = {
-	    	IdUsuario: 1, /// A trilha já define o usuário unicamente
-			IdTrilha: localStorage.getItem("id-trilha-atual"),
-			IdCurso: localStorage.getItem("id-curso-atual"),
-			IdDisciplina: localStorage.getItem("id-disciplina-atual"),
-			IdUnidade: link.match(/(?:IdUnidade=)(\d+)/)[1],
-			IdAtividade: link.match(/(?:IdAtividade=)(\d+)/)[1],
-			BlocoId: -1
+			t: localStorage.getItem("id-trilha-atual"),
+			c: localStorage.getItem("id-curso-atual"),
+			d: localStorage.getItem("id-disciplina-atual"),
+			u: link.match(/(?:IdUnidade=)(\d+)/)[1],
+			a: link.match(/(?:IdAtividade=)(\d+)/)[1],
+			b: "-1"
 	    }
 
 	    /// avisa background script do usuario
@@ -277,7 +276,7 @@ function getUserInfo() {
 			//console.log("BEFORE USERINFO QUERY");
 			if(response !== undefined && response.currentUser !== undefined) {
 				currentUser = response.currentUser;
-				currentBlocoId = currentUser.BlocoId;
+				currentBlocoId = Number(currentUser.b);
 				//console.log("INSIDE USERINFO QUERY");
 				//console.log(currentUser);
 			} else {
