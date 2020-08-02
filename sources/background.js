@@ -4,13 +4,13 @@ var currentUser = undefined;
 var userLogList = [];
 
 (function() {
-    const networkFilters = {
-        urls: [
-            "*://*.cloudfront.net/*/aulainterativa/*"
-        ]
-    };
-
-    /// retrieve user logs from storage
+	const networkFilters = {
+		urls: [
+			"*://*.cloudfront.net/*/aulainterativa/*"
+		]
+	};
+	
+	/// retrieve user logs from storage
 	chrome.storage.sync.get(['UserLogs'], function(result) {
 		/// if user logs is not empty
 		if(result.UserLogs) {
@@ -21,19 +21,39 @@ var userLogList = [];
 			console.log("userLogList is empty");
 		}
 	});
-
+	
+	/// update list when changed elsewhere
+	chrome.storage.onChanged.addListener(function(changes, namespace) {
+		for (var key in changes) {
+			var storageChange = changes[key];
+			console.log('Storage key "%s" in namespace "%s" changed. ' +
+			'Old value was "%s", new value is "%s".',
+			key,
+			namespace,
+			storageChange.oldValue,
+			storageChange.newValue);
+			
+			/// if user logs has been updated
+			if(key === "UserLogs" && namespace === "sync") {
+				/// update in memory variable
+				userLogList = storageChange.newValue;
+				console.log("Updated Sync Value");
+			}
+		}
+	});
+	
 	/// adiciona listener as requests
-    chrome.webRequest.onBeforeRequest.addListener((details) => {
-        const { tabId, requestId } = details;
-
+	chrome.webRequest.onBeforeRequest.addListener((details) => {
+		const { tabId, requestId } = details;
+		
 		//console.log(details.url);
 		/// checka se a request é de um arquivo flash
-        if(details.url.indexOf(".swf") !== -1) {
+		if(details.url.indexOf(".swf") !== -1) {
 			//console.log(details.url);
 			/// separa o nome do arquivo flash
 			let flashFileName = details.url.substr(details.url.lastIndexOf('/') + 1);
 			console.log(flashFileName);
-
+			
 			/// para todas as abas ativas
 			chrome.tabs.query({active: true}, function(tabs) {
 				/// manda mensagem com o nome do arquivo flash
@@ -42,108 +62,127 @@ var userLogList = [];
 					if(response.status === "success") {
 						console.log("blocoIdUpdate");
 						currentUser = response.currentUser;
-
+						
 						updateUserLogs(currentUser);
 					}
-			 	});
+				});
 			});
-
-        }
-
-    }, networkFilters);
-
+			
+		}
+		
+	}, networkFilters);
+	
+	/// manage messages from content.js
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
+			/// has to have messageType attribute
 			if (request.hasOwnProperty("messageType")) {
-
+				
+				/// if it's a login message
 				if(request.messageType === "user_login") {
 					if(request.currentUser === undefined || Object.keys(request.currentUser).length === 0 && request.currentUser.constructor === Object) {
 						sendResponse({});
 						return false;
 					}
-
+					
+					/// update current
 					currentUser = request.currentUser;
-					currentUser.BlocoId = 0;
-
+					currentUser.b = "0";
+					
+					let foundLog = false;
+					/// find it in log list
 					for (var i = userLogList.length - 1; i >= 0; i--) {
-						if(userLogList[i].IdUsuario === currentUser.IdUsuario
-							&& userLogList[i].IdTrilha === currentUser.IdTrilha
-							&& userLogList[i].IdCurso === currentUser.IdCurso
-							&& userLogList[i].IdDisciplina === currentUser.IdDisciplina
-							&& userLogList[i].IdAtividade === currentUser.IdAtividade) {
-
-							if(userLogList[i].BlocoId >= currentUser.BlocoId) {
-								currentUser.BlocoId = userLogList[i].BlocoId;
+						if(userLogList[i].t === currentUser.t
+							&& userLogList[i].c === currentUser.c
+							&& userLogList[i].d === currentUser.d
+							&& userLogList[i].a === currentUser.a) {
+								foundLog = true;
+								
+								/// if found blocoId is greater than current blocoId
+								if(Number(userLogList[i].b) >= Number(currentUser.b)) {
+									currentUser.b = String(userLogList[i].b);
+								}
 							}
 						}
+						
+						if(foundLog === false) {
+							logUser(currentUser);
+						}
+						
+						//logUser(request.currentUser);
+						
+						sendResponse({});
+						
+						return true;
 					}
-
-					//logUser(request.currentUser);
-
-					sendResponse({});
-
-					return true;
+					
+					if(request.messageType === "request_user") {
+						console.log("User has been requested!");
+						sendResponse({currentUser: currentUser});
+						return true;
+					}
+					
+					if(request.messageType === "update_userlogs") {
+						console.log("User has been updated!");
+						updateUserLogs(request.currentUser);
+						sendResponse({currentUser: currentUser});
+						return true;
+					}
 				}
-
-				if(request.messageType === "request_user") {
-					console.log("User has been requested!");
-					sendResponse({currentUser: currentUser});
-					return true;
+				//			return true;
+			});
+			
+			
+		}());
+		
+		function logUser(user) {
+			console.log("User has been logged!");
+			console.log(user);
+			
+			if(user === undefined || Object.keys(user).length === 0 && user.constructor === Object) return;
+			
+			//user["LogTimestamp"] = Date.now();
+			userLogList.push(user);
+			
+			chrome.storage.sync.set({UserLogs: userLogList}, function() {
+				console.log("userLogList saved");
+			});
+		}
+		
+		function updateUserLogs(user) {
+			for (var i = userLogList.length - 1; i >= 0; i--) {
+				if(userLogList[i].t === user.t
+					&& userLogList[i].c === user.c
+					&& userLogList[i].d === user.d
+					&& userLogList[i].a === user.a) {
+						
+						userLogList.splice(i, 1);
+					}
 				}
-
-				if(request.messageType === "update_userlogs") {
-					console.log("User has been updated!");
-					updateUserLogs(request.currentUser);
-					sendResponse({currentUser: currentUser});
-					return true;
+				
+				logUser(user);
+			}
+			
+			function emptyUserlogList() {
+				chrome.storage.sync.set({UserLogs: []}, function() {
+					console.log("userLogList is now empty!");
+				});
+			}
+			
+			function jumpToBloco(blocoId) {
+				if(currentUser !== undefined) {
+					currentUser.b = String(blocoId);
+					updateUserLogs(currentUser);
+				} else {
+					console.log("currentUser is undefined");
 				}
 			}
-//			return true;
-		});
-
-
-}());
-
-function logUser(user) {
-	console.log("User has been logged!");
-	console.log(user);
-
-	if(user === undefined || Object.keys(user).length === 0 && user.constructor === Object) return;
-
-	user["LogTimestamp"] = Date.now();
-	userLogList.push(user);
-
-	chrome.storage.sync.set({UserLogs: userLogList}, function() {
-		console.log("userLogList saved");
-	});
-}
-
-function updateUserLogs(user) {
-	for (var i = userLogList.length - 1; i >= 0; i--) {
-		if(userLogList[i].IdUsuario === user.IdUsuario
-			&& userLogList[i].IdTrilha === user.IdTrilha
-			&& userLogList[i].IdCurso === user.IdCurso
-			&& userLogList[i].IdDisciplina === user.IdDisciplina
-			&& userLogList[i].IdAtividade === user.IdAtividade) {
-
-			userLogList.splice(i, 1);
-		}
-	}
-
-	logUser(user);
-}
-
-function emptyUserlogList() {
-	chrome.storage.sync.set({UserLogs: []}, function() {
-		console.log("userLogList is now empty!");
-	});
-}
-
-function jumpToBloco(blocoId) {
-	if(currentUser !== undefined) {
-		currentUser.BlocoId = String(blocoId);
-		updateUserLogs(currentUser);
-	} else {
-		console.log("currentUser is undefined");
-	}
-}
+			
+			function goToNextBloco() {
+				if(currentUser !== undefined) {
+					currentUser.b = String(Number(currentUser.b) + 1);
+					updateUserLogs(currentUser);
+				} else {
+					console.log("currentUser is undefined");
+				}
+			}
