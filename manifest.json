@@ -10,13 +10,17 @@
         "*://*.cloudfront.net/*/aulainterativa/*",
         "*://*.evoluaeducacao.com.br/Cursos*"
     ],
+    "web_accessible_resources": [
+        "/resources/images/technos_logo.png"
+
+    ],
     "background": { "scripts": ["sources/background.js"] },
     "content_scripts": [{
         "run_at": "document_end",
         "all_frames": true,
         "matches": [
             "*://*.cloudfront.net/*/aulainterativa/*",
-            "*://*.evoluaeducacao.com.br/Cursos*"
+            "*://*.evoluaeducacao.com.br/*"
         ],
         "js": ["sources/jquery-3.5.1.min.js", "sources/content.js"]
     }]
