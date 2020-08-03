@@ -14,6 +14,10 @@ var currentUser = undefined;
 function main() {
 	addBlocoIdListener();
 
+	if(location.href.indexOf("evoluaeducacao.com.br") !== -1) {
+		changeLogo();
+	}
+
 	if(location.href.indexOf("cloudfront.net") !== -1 && location.href.indexOf("aulainterativa") !== -1) {
 		runAulaScript();
 		return;
@@ -37,6 +41,25 @@ function runAulaScript() {
 
 	// wait for currentUser to be defined
 	waitUserData();
+}
+
+function changeLogo() {
+	/// url to logo image
+	let logoUrl = chrome.extension.getURL("/resources/images/technos_logo.png");
+
+	/// get page image elements to be replaces
+	loginImgElems = document.getElementsByClassName("logo-login");
+	logoNavImgElems = document.getElementsByClassName("logo-nav");
+
+	/// replace them if found
+
+	if(loginImgElems.length) {
+		loginImgElems[0].src = logoUrl;
+	}
+	
+	if(logoNavImgElems.length) {
+		logoNavImgElems[0].src = logoUrl;
+	}
 }
 
 function waitUserData() {
