@@ -7,12 +7,10 @@
     "permissions": [
         "storage",
         "webRequest",
-        "*://*.cloudfront.net/*/aulainterativa/*",
-        "*://*.evoluaeducacao.com.br/Cursos*"
+        "*://*.cloudfront.net/*/aulainterativa/*"
     ],
     "web_accessible_resources": [
         "/resources/images/technos_logo.png"
-
     ],
     "background": { "scripts": ["sources/background.js"] },
     "content_scripts": [{
