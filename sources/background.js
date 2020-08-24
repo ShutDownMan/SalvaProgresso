@@ -42,23 +42,23 @@ var userLogList = [];
 		}
 	});
 	
-	/// adiciona listener as requests
+	/// add listener to requests
 	chrome.webRequest.onBeforeRequest.addListener((details) => {
 		const { tabId, requestId } = details;
 		
 		//console.log(details.url);
-		/// checka se a request é de um arquivo flash
+		/// check if request is for a flash file
 		if(details.url.indexOf(".swf") !== -1) {
 			//console.log(details.url);
-			/// separa o nome do arquivo flash
+			/// separate file name from url
 			let flashFileName = details.url.substr(details.url.lastIndexOf('/') + 1);
 			console.log(flashFileName);
 			
-			/// para todas as abas ativas
+			/// for all active tabs
 			chrome.tabs.query({active: true}, function(tabs) {
-				/// manda mensagem com o nome do arquivo flash
+				/// send message to content script of the tab with the corresponding flash file name
 				chrome.tabs.sendMessage(tabId, {messageType: "blocoIdUpdate", flashFileName: flashFileName}, function(response) {
-					/// se o updatefoi um sucesso atualiza a lista
+					/// if the update was a sucess save current user
 					if(response.status === "success") {
 						console.log("blocoIdUpdate");
 						currentUser = response.currentUser;

@@ -18,7 +18,7 @@ function main() {
 		changeLogo();
 	}
 
-	if(location.href.indexOf("cloudfront.net") !== -1 && location.href.indexOf("aulainterativa") !== -1) {
+	if(location.href.indexOf("rsc.cdn77.org") !== -1 && location.href.indexOf("aulainterativa") !== -1) {
 		runAulaScript();
 		return;
 	}
@@ -98,9 +98,12 @@ function updateDadosAula() {
 	// getting legendas from resource
 	getLegs(location.href.substring(0, location.href.lastIndexOf('/')) + '/' + legs.text())
 
+	console.log("AulaXML: ")
+	console.log(currentAulaXML);
+
 	/// se o bloco atual eh o ultimo bloco
 	if(finalBlocoId === currentBlocoId) {
-		/// coloca bloco atual como inicio
+		/// coloca bloco atual como inicio2
 		currentBlocoId = 0;
 		currentUser.b = String(currentBlocoId);
 		/// atualiza nos logs
