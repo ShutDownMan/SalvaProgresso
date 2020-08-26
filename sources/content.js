@@ -18,7 +18,7 @@ function main() {
 		changeLogo();
 	}
 
-	if(location.href.indexOf("rsc.cdn77.org") !== -1 && location.href.indexOf("aulainterativa") !== -1) {
+	if((location.href.indexOf("cloudfront.net") !== -1 || location.href.indexOf("rsc.cdn77.org") !== -1) && location.href.indexOf("aulainterativa") !== -1) {
 		runAulaScript();
 		return;
 	}
@@ -77,7 +77,7 @@ function waitUserData() {
 	}, 250);
 }
 
-function updateDadosAula() {
+async function updateDadosAula() {
 
 	// separating function and eval on it
 
@@ -89,17 +89,17 @@ function updateDadosAula() {
 
 	// Getting XML on it
 
-	/// oega o xml que a funcao retorna
+	/// get xml output from function
 	dadosAulaXML = $.parseXML(dadosAulaJS());
 
 	/// url da legenda
 	var legs = $(dadosAulaXML).find("localLegenda")
 
 	// getting legendas from resource
-	getLegs(location.href.substring(0, location.href.lastIndexOf('/')) + '/' + legs.text())
+	await getLegs(location.href.substring(0, location.href.lastIndexOf('/')) + '/' + legs.text())
 
-	console.log("AulaXML: ")
-	console.log(currentAulaXML);
+	// console.log("AulaXML: ")
+	// console.log(currentAulaXML);
 
 	/// se o bloco atual eh o ultimo bloco
 	if(finalBlocoId === currentBlocoId) {
@@ -119,6 +119,8 @@ function updateDadosAula() {
 		/// se o bloco atual tiver id menor que o bloco do usuario
 		if(Number($(this).find("id").text()) < currentBlocoId) {
 			/// libera bloco
+			$(this).find("data").text("1");
+			$(this).find("hora").text("1");
 			$(this).find("nota").text("10");
 			$(this).find("status").text("1");
 		}
@@ -136,6 +138,7 @@ function updateDadosAula() {
 
 	//console.log(newDadosAulaFunc);
 
+	/// append modified configs script into source
 	var scriptTag = document.createElement('script');
 	var code = document.createTextNode(newDadosAulaFunc);
 	scriptTag.appendChild(code);
@@ -179,7 +182,7 @@ function getLegs(localLegenda) {
 
 	//console.log(localLegenda)
 
-	$.ajax({
+	return $.ajax({
 		type: "GET",
 		dataType: "text",
 		url: localLegenda,
@@ -283,7 +286,7 @@ function runUserLoginScript() {
 			d: localStorage.getItem("id-disciplina-atual"),
 			u: link.match(/(?:IdUnidade=)(\d+)/)[1],
 			a: link.match(/(?:IdAtividade=)(\d+)/)[1],
-			b: "-1"
+			b: "0"
 	    }
 
 	    /// avisa background script do usuario

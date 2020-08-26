@@ -87,7 +87,7 @@ var userLogList = [];
 					
 					/// update current
 					currentUser = request.currentUser;
-					currentUser.b = "0";
+					currentUser.b = "1";
 					
 					let foundLog = false;
 					/// find it in log list
