@@ -6,7 +6,8 @@ var userLogList = [];
 (function() {
 	const networkFilters = {
 		urls: [
-			"*://*.cloudfront.net/*/aulainterativa/*"
+			"*://*.cloudfront.net/*/aulainterativa/*",
+			"*://*.rsc.cdn77.org/*/aulainterativa/*"
 		]
 	};
 	

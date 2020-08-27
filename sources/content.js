@@ -216,7 +216,7 @@ function populateBlocosDict() {
 		return;
 	}
 
-	/// passa pelo arquivo xml e cria um dicionario com os nomesde aquivos/ids
+	/// passa pelo arquivo xml e cria um dicionario com os nomes de aquivos/ids
 	$(currentAulaXML).find("bloco").each(function(index) {
 		blocosDict[$(this).attr("filme")] = $(this).attr("id");
 
