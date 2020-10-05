@@ -249,9 +249,9 @@ function addBlocoIdListener() {
 				let fileId = blocosDict[request.flashFileName];
 
 				/// se id do bloco for maior que id atual
-				if(fileId > currentBlocoId) {
+				if(Number(fileId) > Number(currentBlocoId)) {
 					/// seta o id atual para id do arquivo
-					currentBlocoId = fileId;
+					currentBlocoId = Number(fileId);
 
 					/// atualiza nos logs
 					if(currentUser !== undefined) {

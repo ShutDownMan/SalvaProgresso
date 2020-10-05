@@ -1,12 +1,13 @@
 {
     "manifest_version": 2,
     "name": "Salvador de Progresso Technos",
-    "version": "0.0.0.6",
+    "version": "0.0.0.7",
     "description": "Salva o progresso nas aulas da plataforma Evolua.",
     "icons": { "128": "resources/images/icon128.png"},
     "permissions": [
         "storage",
         "webRequest",
+        "webRequestBlocking",
         "*://*.cloudfront.net/*/aulainterativa/*",
         "*://*.rsc.cdn77.org/*/aulainterativa/*"
     ],
