@@ -7,7 +7,6 @@
     "permissions": [
         "storage",
         "webRequest",
-        "webRequestBlocking",
         "*://*.cloudfront.net/*/aulainterativa/*",
         "*://*.rsc.cdn77.org/*/aulainterativa/*"
     ],

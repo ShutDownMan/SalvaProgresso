@@ -70,7 +70,7 @@ var userLogList = [];
 
 		}
 
-	}, networkFilters, ["blocking"]);
+	}, networkFilters, []);
 
 	/// manage messages from content.js
 	chrome.runtime.onMessage.addListener(
